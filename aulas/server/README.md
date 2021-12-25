@@ -24,14 +24,16 @@ Atualiza de forma automática o projeto toda vez que é salvo
 comando acima alterado para
 ### yarn run dev
 
+para escrever query do banco de dados
+### yarn add knex
 
+passando o caminho para o arquivo knexfile.ts na raiz
+### npx knex migrate:latest --knexfile knexfile.ts migrate:latest
 
-comando para instalar o mongodb
-
-### yarn add mongoose
+instalando o package sqlite3
+### yarn add sqlite3
 
 para que o express entenda Multipart
-
 ### yarn add multer
 
 controla o acesso a api
