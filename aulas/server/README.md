@@ -30,6 +30,9 @@ para escrever query do banco de dados
 passando o caminho para o arquivo knexfile.ts na raiz
 ### npx knex migrate:latest --knexfile knexfile.ts migrate:latest
 
+comando acima alterado para
+### yarn run knex:migrate
+
 instalando o package sqlite3
 ### yarn add sqlite3
 
