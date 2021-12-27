@@ -1,7 +1,49 @@
-import { Request, response, Response } from 'express';
+import { Request, Response } from 'express';
 import knex from '../database/connection';
 
 class PointsController {
+
+    // filtra por: cidade, uf, items
+    async index(req: Request, res: Response) {
+        const { city, uf, items } = req.query;
+
+        //trim é para limpar espaços em branco
+        const parsedItems = String(items).split(',').map(item => item.trim());
+
+        const points = await knex('points')
+            .join('point_items', 'points.id', '=', 'point_items.point_id')
+            .whereIn('point_items.item_id', parsedItems)
+            .where('city', String(city))
+            .where('uf', String(uf))
+            .distinct()
+            .select('points.*');
+
+        return res.json(points);
+
+    }
+
+    async show(req: Request, res: Response) {
+        const { id } = req.params;
+
+        const point = await knex('points').where('id', id).first();
+
+        if(!point){
+            return res.status(400).json({message: 'Point not found.'})
+        }
+
+        /**
+         * SELECT * items
+         * JOIN point_items 
+         * ON item.id = point_items.item_id
+         * WHERE point_items.point_id = {id}
+         */
+        const items = await knex('items')
+            .join('point_items', 'items.id', '=', 'point_items.item_id' )
+            .where('point_items.point_id', id);
+
+        return res.json({ point, items });
+    }
+
     async create(req: Request, res: Response){
         const {
             name,
@@ -18,10 +60,10 @@ class PointsController {
          * caso o primeiro insert falhe, o segundo não
          * será executado
          */
-        // const trx = await knex.transaction()
+        const trx = await knex.transaction();
 
         const point = {
-            image: 'image-fake',
+            image: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=60',
             name,
             email,
             whatsapp,
@@ -32,7 +74,7 @@ class PointsController {
         }
 
         // inserte de novo ponto
-        const insertedIds = await knex('points').insert(point);
+        const insertedIds = await trx('points').insert(point);
 
         const point_id = insertedIds[0];
         if(point_id){
@@ -49,7 +91,10 @@ class PointsController {
             /**
              * inserte na tabela point_items
              */
-            await knex('point_items').insert(pointItems);
+            await trx('point_items').insert(pointItems);
+
+            //caso tudo esteja correto, o insert terá o commit executado
+            await trx.commit();
 
             return res.json({
                 id: point_id,
@@ -57,7 +102,7 @@ class PointsController {
 
             });
         }else{
-            return res.json({message: 'Error'});
+            return res.status(400).json({message: 'Error: Não possível realizar essa operação, contate a equipe de desenvolvimento!'});
         }
     }
 }

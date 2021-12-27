@@ -16,6 +16,9 @@ const pointsController = new PointsController();
 routes.get('/items', itemsController.index);
 //criar um ponto
 routes.post('/points', pointsController.create);
-
+//busca por points por palavras chaves
+routes.get('/points', pointsController.index);
+//busca um point específico
+routes.get('/points/:id', pointsController.show);
 
 export default routes;

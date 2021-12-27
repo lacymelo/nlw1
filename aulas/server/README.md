@@ -42,5 +42,8 @@ para que o express entenda Multipart
 controla o acesso a api
 ### yarn add cors
 
+dependência de desenvolvimento
+### yarn add @types/cors -D
+
 trabalha com tempo real
 ### yarn add socket.io
