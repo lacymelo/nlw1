@@ -8,7 +8,7 @@ class PointsController {
         const { city, uf, items } = req.query;
 
         //trim é para limpar espaços em branco
-        const parsedItems = String(items).split(',').map(item => item.trim());
+        const parsedItems = String(items).split(',').map(item => Number(item.trim()));
 
         const points = await knex('points')
             .join('point_items', 'points.id', '=', 'point_items.point_id')
@@ -16,7 +16,7 @@ class PointsController {
             .where('city', String(city))
             .where('uf', String(uf))
             .distinct()
-            .select('points.*');
+            .select('points.*'); 
 
         return res.json(points);
 
@@ -77,33 +77,28 @@ class PointsController {
         const insertedIds = await trx('points').insert(point);
 
         const point_id = insertedIds[0];
-        if(point_id){
-            /**
-             * percorre os items, monta o array de items ligados aum ponto
-             */
-            const pointItems = items.map((item_id: number) => {
-                return {
-                    item_id,
-                    point_id
-                }
-            })
+        /**
+         * percorre os items, monta o array de items ligados aum ponto
+         */
+        const pointItems = items.map((item_id: number) => {
+            return {
+                item_id,
+                point_id
+            }
+        })
 
-            /**
-             * inserte na tabela point_items
-             */
-            await trx('point_items').insert(pointItems);
+        /**
+         * inserte na tabela point_items
+         */
+        await trx('point_items').insert(pointItems);
 
-            //caso tudo esteja correto, o insert terá o commit executado
-            await trx.commit();
+        //caso tudo esteja correto, o insert terá o commit executado
+        await trx.commit();
 
-            return res.json({
-                id: point_id,
-                ...point
-
-            });
-        }else{
-            return res.status(400).json({message: 'Error: Não possível realizar essa operação, contate a equipe de desenvolvimento!'});
-        }
+        return res.json({
+            id: point_id,
+            ...point
+        });
     }
 }
 
