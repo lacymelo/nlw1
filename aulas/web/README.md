@@ -8,3 +8,12 @@ para instalar fonte de ícones
 
 Navegação em rotas
 ### yarn add react-router-dom
+
+Para instalar a biblioteca de mapa
+### yarn add leaflet react-leaflet
+dependência de desenvolvimento
+### yarn add @types/react-leaflet -D
+
+permite fazer requisições para API
+
+### yarn add axios
