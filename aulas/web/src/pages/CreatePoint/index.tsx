@@ -1,5 +1,5 @@
 import React, { useEffect, useState, ChangeEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FiArrowLeft } from 'react-icons/fi';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
 import api from "../../services/api";
@@ -26,6 +26,8 @@ interface IBGECityResponse {
 
 const CreatePoint = () => {
 
+    const navigate = useNavigate();
+
     //armazenando o estado dos items
     const [items, setItems] = useState<Item[]>([]);
     const [ufs, setUfs] = useState<String[]>([]);
@@ -33,20 +35,39 @@ const CreatePoint = () => {
     const [selectedUf, setSelectedUf] = useState('0');
     const [selectedCity, setSelectedCity] = useState('0');
     const [selectedPosition, setSelectedPosition] = useState<[number, number]>([0,0]);
+    const [initialPosition, setInitialPosition] = useState<[number, number]>([0, 0]);
+    const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        whatsapp: '',
+    });
+    
     useEffect(() => {
         api.get('items').then(response => {
             setItems(response.data);
         });
+
     }, []);
 
+    useEffect(() => {
+        navigator.geolocation.getCurrentPosition((position) => {
+            const { latitude, longitude } = position.coords;
+
+            setInitialPosition([latitude, longitude]);
+        });
+    }, []);
+    
+    
     useEffect(() => {
         axios.get<IBGEUFResponse[]>('https://servicodados.ibge.gov.br/api/v1/localidades/estados').then(response => {
             const ufInitials = response.data.map(uf => uf.sigla);
             setUfs(ufInitials);
         });
     }, []);
-
+    
+    
     useEffect(() => {
         axios.get<IBGECityResponse[]>(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${selectedUf}/municipios`).then(response => {
             const cityInitials = response.data.map(uf => uf.nome);
@@ -54,12 +75,13 @@ const CreatePoint = () => {
         });
     }, [selectedUf]);
 
+    
     //disparada quando é selecionado um estado
     function handleSelectUf(event: ChangeEvent<HTMLSelectElement>){
         const uf = event.target.value;
         setSelectedUf(uf);
     }
-
+    
     //disparada quando é selecionado uma cidade
     function handleSelectCity(event: ChangeEvent<HTMLSelectElement>){
         const city = event.target.value;
@@ -74,8 +96,6 @@ const CreatePoint = () => {
                     e.latlng.lat,
                     e.latlng.lng
                 ]);     
-                
-                console.log(e.latlng);
             },            
         })
     
@@ -91,6 +111,53 @@ const CreatePoint = () => {
         
     }
 
+    function handleInputChange(event: ChangeEvent<HTMLInputElement>) {
+        setFormData({
+            ...formData, [event.target.name]: event.target.value
+        });
+    }
+
+    function handleSelectItem(id: number) {
+        const alreadySelected = selectedItems.findIndex(item => item === id);
+
+        if(alreadySelected >= 0){
+            const filterItems = selectedItems.filter(item => item !== id);
+            setSelectedItems(filterItems);
+        }else{
+            setSelectedItems([...selectedItems, id]);
+        }
+    }
+
+    async function handleSubmit(event: ChangeEvent<HTMLFormElement>) {
+        event.preventDefault();
+
+        const {name, email, whatsapp} = formData;
+        const uf = selectedUf;
+        const city = selectedCity;
+        const latitude = selectedPosition[0];
+        const longitude = selectedPosition[1];
+        const items = selectedItems;
+
+        const data = {
+            name,
+            email,
+            whatsapp,
+            uf,
+            city,
+            latitude,
+            longitude,
+            items
+        }
+
+        await api.post('points', data)
+        .then(() => {
+            alert('Ponto de coleta criado!');
+            return navigate('/');
+        }).catch(() => {
+            alert('error: contate a equipe de desenvolvimento')
+        });  
+    }
+
     return(
         <>
             <div id="page-create-point">
@@ -104,7 +171,7 @@ const CreatePoint = () => {
                     </Link>
                 </header>
 
-                <form>
+                <form onSubmit={handleSubmit}>
                     <h1>Cadastro do<br/> ponto de coleta</h1>
 
                     <fieldset>
@@ -121,6 +188,7 @@ const CreatePoint = () => {
                                 type="text"
                                 name="name"
                                 id="name"
+                                onChange={handleInputChange}
                                  />
                         </div>
 
@@ -134,6 +202,7 @@ const CreatePoint = () => {
                                     type="text"
                                     name="email"
                                     id="email"
+                                    onChange={handleInputChange}
                                     />
                             </div>
 
@@ -146,6 +215,7 @@ const CreatePoint = () => {
                                     type="text"
                                     name="whatsapp"
                                     id="whatsapp"
+                                    onChange={handleInputChange}
                                     />
                             </div>
                         </div>
@@ -157,14 +227,17 @@ const CreatePoint = () => {
                             <span>Selecione o endereço no mapa</span>
                         </legend>
 
-                        <MapContainer center={[-2.237008, -49.502241]} zoom={15}>
-                            <TileLayer
-                                attribution='&amp; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
-                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                            />
-                        
-                            <Markers />
-                        </MapContainer>
+                        {initialPosition[0] ?  
+                            <MapContainer center={initialPosition} zoom={15}>
+                                <TileLayer
+                                    attribution='&amp; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                />
+
+                                {selectedPosition ? <Markers /> : <Marker position={initialPosition} />}
+                            
+                            </MapContainer>
+                        : null}
 
                         <div className="field-group">
                             <div className="field">
@@ -197,7 +270,11 @@ const CreatePoint = () => {
 
                         <ul className="items-grid">
                             {items.map(item => (
-                                <li key={item.id}>
+                                <li 
+                                    key={item.id} 
+                                    onClick={() => handleSelectItem(item.id)}
+                                    className={selectedItems.includes(item.id) ? 'selected' : ''}
+                                    >
                                     <img src={item.image_url} alt="teste" />
                                     <span>{item.title}</span>
                                 </li>
