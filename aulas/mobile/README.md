@@ -3,6 +3,10 @@
 instalar o projeto mobile
 ### expo init mobile
 
+Para utilizar as fontes do google
+### expo install expo-font @expo-google-fonts/ubuntu @expo-google-fonts/roboto
+### yarn add expo-app-loading
+
 navegação de rotas
 ### yarn add @react-navigation/native
 
@@ -15,14 +19,24 @@ Instalando a biblioteca nativa do navegador da pilha
 Instalando a biblioteca para trabalhar com mapas
 ### expo install react-native-maps
 
-Instalando o módulo de Geolocalização do expo, para recuperar a localização do usuário
-### expo install expo-location
+trabalhando com constantes
+### expo install expo-constants
 
-Para mostrar informação do navegador dentro do mobile
-### expo install react-native-webview
+biblioteca para o react native entender svg
+### expo install react-native-svg
+
 
 Para chamadas API
 ### yarn add axios
+
+Instalando o módulo de Geolocalização do expo, para recuperar a localização do usuário
+### expo install expo-location
+
+Para utilizar o email
+### expo install expo-mail-composer
+
+Para utilizar select
+### expo install @react-native-picker/picker
 
 Para processar em tempo real protocolos websocket e http
 ### yarn add socket.io-client
