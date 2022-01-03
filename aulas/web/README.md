@@ -20,3 +20,6 @@ permite fazer requisições para API
 
 upload de imagem
 ### yarn add react-dropzone
+
+validação de dados no frontend
+### 
