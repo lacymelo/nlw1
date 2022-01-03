@@ -38,6 +38,3 @@ Para utilizar o email
 Para utilizar select
 ### expo install @react-native-picker/picker
 
-Para processar em tempo real protocolos websocket e http
-### yarn add socket.io-client
-

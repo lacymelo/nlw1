@@ -17,3 +17,6 @@ dependência de desenvolvimento
 permite fazer requisições para API
 
 ### yarn add axios
+
+upload de imagem
+### yarn add react-dropzone

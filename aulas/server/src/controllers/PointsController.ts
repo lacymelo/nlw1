@@ -16,9 +16,16 @@ class PointsController {
             .where('city', String(city))
             .where('uf', String(uf))
             .distinct()
-            .select('points.*'); 
+            .select('points.*');
 
-        return res.json(points);
+        const serializedPoints = points.map(point => {
+            return {
+                ...point,
+                image_url: `http://192.168.10.165:3333/uploads/${point.image}`,
+            }
+        })
+
+        return res.json(serializedPoints);
 
     }
 
@@ -31,6 +38,11 @@ class PointsController {
             return res.status(400).json({message: 'Point not found.'})
         }
 
+        const serializedPoint =  {
+            ...point,
+            image_url: `http://192.168.10.165:3333/uploads/${point.image}`,
+        };
+
         /**
          * SELECT * items
          * JOIN point_items 
@@ -41,7 +53,7 @@ class PointsController {
             .join('point_items', 'items.id', '=', 'point_items.item_id' )
             .where('point_items.point_id', id);
 
-        return res.json({ point, items });
+        return res.json({ point: serializedPoint, items });
     }
 
     async create(req: Request, res: Response){
@@ -63,7 +75,7 @@ class PointsController {
         const trx = await knex.transaction();
 
         const point = {
-            image: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=60',
+            image: req.file?.filename,
             name,
             email,
             whatsapp,
@@ -80,7 +92,12 @@ class PointsController {
         /**
          * percorre os items, monta o array de items ligados aum ponto
          */
-        const pointItems = items.map((item_id: number) => {
+
+        // convertendo string em array de números
+        const pointItems = items
+            .split(',')
+            .map((item: string) => Number(item.trim()))
+            .map((item_id: number) => {
             return {
                 item_id,
                 point_id

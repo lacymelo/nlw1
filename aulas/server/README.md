@@ -36,14 +36,21 @@ comando acima alterado para
 instalando o package sqlite3
 ### yarn add sqlite3
 
-para que o express entenda Multipart
+para que o express entenda Multipart form data
 ### yarn add multer
+
+dependência de desenvolvimento multer
+### yarn add @types/multer -D
 
 controla o acesso a api
 ### yarn add cors
 
-dependência de desenvolvimento
+dependência de desenvolvimento cors
 ### yarn add @types/cors -D
 
 trabalha com tempo real
 ### yarn add socket.io
+
+validação de dados
+### yarn add celebrate
+### yarn add @types/hapi__joi -D
