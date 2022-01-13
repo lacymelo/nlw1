@@ -6,7 +6,7 @@ import CreatePoint from './pages/CreatePoint';
 
 /**
  * Obs.: não precisa usar o exact
- * esse processo de navegação, foi melhorado na versão 6 do 
+ * esse processo de navegação foi melhorado na versão 6 do 
  * react-router-dom
  */
 

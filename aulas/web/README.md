@@ -15,11 +15,7 @@ dependência de desenvolvimento
 ### yarn add @types/react-leaflet -D
 
 permite fazer requisições para API
-
 ### yarn add axios
 
 upload de imagem
 ### yarn add react-dropzone
-
-validação de dados no frontend
-### 

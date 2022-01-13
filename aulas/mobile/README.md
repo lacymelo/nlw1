@@ -25,7 +25,6 @@ trabalhando com constantes
 biblioteca para o react native entender svg
 ### expo install react-native-svg
 
-
 Para chamadas API
 ### yarn add axios
 
